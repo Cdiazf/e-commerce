@@ -20,6 +20,11 @@
       </div>
     </div>
 
+    <!-- Loading and Error States -->
+    <div v-if="isLoading" class="text-center">Loading products...</div>
+    <div v-else-if="error" class="text-center text-red-500">{{ error }}</div>
+
+
     <!-- Product Grid -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       <div
@@ -39,53 +44,26 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from 'vue';
+import apiClient from "@/api/axios.js";
 
-// Product Data
-const products = ref([
-  {
-    id: 1,
-    name: "Basic Tee 8-Pack",
-    description: "8 colors",
-    price: 256,
-    image: "https://via.placeholder.com/300x400?text=Basic+Tee+8-Pack",
-  },
-  {
-    id: 2,
-    name: "Basic Tee",
-    description: "Black",
-    price: 32,
-    image: "https://via.placeholder.com/300x400?text=Basic+Tee",
-  },
-  {
-    id: 3,
-    name: "Kinda White Basic Tee",
-    description: "White",
-    price: 32,
-    image: "https://via.placeholder.com/300x400?text=White+Tee",
-  },
-  {
-    id: 4,
-    name: "Stone Basic Tee",
-    description: "Charcoal",
-    price: 32,
-    image: "https://via.placeholder.com/300x400?text=Stone+Tee",
-  },
-  {
-    id: 5,
-    name: "Fall Basic Tee 3-Pack",
-    description: "Charcoal",
-    price: 96,
-    image: "https://via.placeholder.com/300x400?text=Fall+Tee+3-Pack",
-  },
-  {
-    id: 6,
-    name: "Linework Artwork Tee 3-Pack",
-    description: "3 colors",
-    price: 108,
-    image: "https://via.placeholder.com/300x400?text=Linework+Artwork+Tee",
-  },
-]);
+const products = ref([]);
+const isLoading = ref(true);
+const error = ref(null);
+
+const fetchProducts = async () => {
+  try {
+    const response = await apiClient.get('/api/products');
+    products.value = response.data;
+  } catch (err) {
+    error.value = 'Failed to load products.';
+    console.error(err);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(fetchProducts);
 
 // Sorting Options
 const sortOptions = ["Most Popular", "Best Rating", "Newest", "Price: Low to High", "Price: High to Low"];
